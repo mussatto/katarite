@@ -1,38 +1,47 @@
 // Types
+import { NPC, ELDER_THOMAS, SHOPKEEPER, ELF, FOREST_HERMIT } from './npcData';
+import { BaseEnemy, ENEMY_GIANT_SPIDER } from './enemyData';
+
+// Area and room constants
+export const AREA_OAKWOOD_TOWN = 'oakwood_town';
+export const AREA_WHISPERING_CAVES = 'whispering_caves';
+export const AREA_MISTY_FOREST = 'misty_forest';
+
+export const ROOM_TOWN_SQUARE = 'town_square';
+export const ROOM_ITEM_SHOP = 'item_shop';
+export const ROOM_CAVE_ENTRANCE = 'cave_entrance';
+export const ROOM_CAVE_CHAMBER = 'cave_chamber';
+export const ROOM_FOREST_EDGE = 'forest_edge';
+export const ROOM_FOREST_CLEARING = 'forest_clearing';
+
+export const WORLD_MAP = 'WORLD_MAP';
+
+// Item constants
+export const ITEM_HEALTH_POTION = 'health_potion';
+
 export interface Exit {
   x: number;
   y: number;
-  target: string; // roomId or 'WORLD_MAP'
+  target: string; // roomId or WORLD_MAP
   targetX?: number;
   targetY?: number;
   targetAreaId?: string; // Used when exit leads to WORLD_MAP
 }
 
-export interface NPC {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  isShop?: boolean;
-  dialogue: string[];
-  shopInventory?: string[]; // Array of itemIds the NPC sells
-}
-
-export interface Enemy {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  health: number;
-  maxHealth: number;
-  damage: number;
-  defense: number;
-  gold: number;
-  dropItems?: string[]; // Array of itemIds with drop chance
-}
-
 export interface Item {
   id: string; // itemId from itemDatabase
+  x: number;
+  y: number;
+}
+
+export interface RoomNPC {
+  npc: NPC; // NPC ID from npcData
+  x: number;
+  y: number;
+}
+
+export interface RoomEnemy {
+  enemy: BaseEnemy; // Enemy ID from enemyData
   x: number;
   y: number;
 }
@@ -42,19 +51,17 @@ export type TileType =
   'shop_counter' | 'chest' | 'stairs_up' | 'stairs_down' | 'bed';
 
 export interface Room {
-  id: string;
   name: string;
   width: number;
   height: number;
   tiles: TileType[][];
   exits: Exit[];
-  npcs?: NPC[];
-  enemies?: Enemy[];
+  npcs?: RoomNPC[]; // NPCs with positions
+  enemies?: RoomEnemy[]; // Enemies with positions
   items?: Item[];
 }
 
 export interface Area {
-  id: string;
   name: string;
   type: 'town' | 'dungeon' | 'wilderness';
   rooms: Record<string, Room>;
@@ -68,18 +75,16 @@ export interface Area {
 // Mock Area Data
 const areaData: Record<string, Area> = {
   // Oakwood Town Area
-  oakwood_town: {
-    id: 'oakwood_town',
+  [AREA_OAKWOOD_TOWN]: {
     name: 'Oakwood Town',
     type: 'town',
     entryPoint: {
-      roomId: 'town_square',
+      roomId: ROOM_TOWN_SQUARE,
       x: 5,
       y: 8
     },
     rooms: {
-      town_square: {
-        id: 'town_square',
+      ROOM_TOWN_SQUARE: {
         name: 'Town Square',
         width: 10,
         height: 10,
@@ -90,33 +95,26 @@ const areaData: Record<string, Area> = {
           {
             x: 9,
             y: 5,
-            target: 'item_shop',
+            target: ROOM_ITEM_SHOP,
             targetX: 1,
             targetY: 5
           },
           {
             x: 5,
             y: 0,
-            target: 'WORLD_MAP',
-            targetAreaId: 'oakwood_town'
+            target: WORLD_MAP,
+            targetAreaId: AREA_OAKWOOD_TOWN
           }
         ],
         npcs: [
           {
-            id: 'elder_thomas',
-            name: 'Elder Thomas',
+            npc: ELDER_THOMAS,
             x: 5,
-            y: 5,
-            dialogue: [
-              "Welcome to Oakwood Town, traveler!",
-              "Feel free to visit our shops and rest at the inn.",
-              "Be careful if you venture to the Whispering Caves. Strange creatures lurk there."
-            ]
+            y: 5
           }
         ]
       },
-      item_shop: {
-        id: 'item_shop',
+      [ROOM_ITEM_SHOP]: {
         name: 'Adventurer\'s Supplies',
         width: 8,
         height: 8,
@@ -125,24 +123,21 @@ const areaData: Record<string, Area> = {
           {
             x: 0,
             y: 5,
-            target: 'town_square',
+            target: ROOM_TOWN_SQUARE,
             targetX: 8,
             targetY: 5
           }
         ],
         npcs: [
           {
-            id: 'shopkeeper',
-            name: 'Elara',
+            npc: SHOPKEEPER,
             x: 4,
-            y: 2,
-            isShop: true,
-            dialogue: [
-              "Welcome to my shop! What can I get for you?",
-              "I have the finest supplies for adventurers like yourself.",
-              "Need potions? Weapons? Just ask!"
-            ],
-            shopInventory: ['health_potion', 'bread', 'sword_basic', 'leather_armor']
+            y: 2
+          },
+          {
+            npc: ELF,
+            x: 4,
+            y: 4
           }
         ]
       }
@@ -150,18 +145,16 @@ const areaData: Record<string, Area> = {
   },
   
   // Whispering Caves Area
-  whispering_caves: {
-    id: 'whispering_caves',
+  [AREA_WHISPERING_CAVES]: {
     name: 'Whispering Caves',
     type: 'dungeon',
     entryPoint: {
-      roomId: 'cave_entrance',
+      roomId: ROOM_CAVE_ENTRANCE,
       x: 5,
       y: 9
     },
     rooms: {
-      cave_entrance: {
-        id: 'cave_entrance',
+      [ROOM_CAVE_ENTRANCE]: {
         name: 'Cave Entrance',
         width: 10,
         height: 10,
@@ -170,34 +163,26 @@ const areaData: Record<string, Area> = {
           {
             x: 5,
             y: 0,
-            target: 'cave_chamber',
+            target: ROOM_CAVE_CHAMBER,
             targetX: 5,
             targetY: 9
           },
           {
             x: 5,
             y: 9,
-            target: 'WORLD_MAP',
-            targetAreaId: 'whispering_caves'
+            target: WORLD_MAP,
+            targetAreaId: AREA_WHISPERING_CAVES
           }
         ],
         enemies: [
           {
-            id: 'bat_1',
-            name: 'Cave Bat',
+            enemy: ENEMY_GIANT_SPIDER,
             x: 3,
-            y: 4,
-            health: 20,
-            maxHealth: 20,
-            damage: 5,
-            defense: 1,
-            gold: 10,
-            dropItems: ['health_potion']
+            y: 4
           }
         ]
       },
-      cave_chamber: {
-        id: 'cave_chamber',
+      [ROOM_CAVE_CHAMBER]: {
         name: 'Dark Chamber',
         width: 10,
         height: 10,
@@ -206,28 +191,21 @@ const areaData: Record<string, Area> = {
           {
             x: 5,
             y: 9,
-            target: 'cave_entrance',
+            target: ROOM_CAVE_ENTRANCE,
             targetX: 5,
             targetY: 0
           }
         ],
         enemies: [
           {
-            id: 'giant_spider',
-            name: 'Giant Spider',
+            enemy: ENEMY_GIANT_SPIDER,
             x: 5,
-            y: 5,
-            health: 30,
-            maxHealth: 30,
-            damage: 8,
-            defense: 2,
-            gold: 25,
-            dropItems: ['health_potion', 'staff_magic']
+            y: 5
           }
         ],
         items: [
           {
-            id: 'health_potion',
+            id: ITEM_HEALTH_POTION,
             x: 8,
             y: 8
           }
@@ -237,18 +215,16 @@ const areaData: Record<string, Area> = {
   },
   
   // Misty Forest Area
-  misty_forest: {
-    id: 'misty_forest',
+  [AREA_MISTY_FOREST]: {
     name: 'Misty Forest',
     type: 'wilderness',
     entryPoint: {
-      roomId: 'forest_edge',
+      roomId: ROOM_FOREST_EDGE,
       x: 5,
       y: 9
     },
     rooms: {
-      forest_edge: {
-        id: 'forest_edge',
+      [ROOM_FOREST_EDGE]: {
         name: 'Forest Edge',
         width: 10,
         height: 10,
@@ -257,41 +233,33 @@ const areaData: Record<string, Area> = {
           {
             x: 5,
             y: 0,
-            target: 'forest_clearing',
+            target: ROOM_FOREST_CLEARING,
             targetX: 5,
             targetY: 9
           },
           {
             x: 5,
             y: 9,
-            target: 'WORLD_MAP',
-            targetAreaId: 'misty_forest'
+            target: WORLD_MAP,
+            targetAreaId: AREA_MISTY_FOREST
           }
         ],
         enemies: [
           {
-            id: 'wolf_1',
-            name: 'Forest Wolf',
+            enemy: ENEMY_GIANT_SPIDER,
             x: 3,
-            y: 5,
-            health: 25,
-            maxHealth: 25,
-            damage: 7,
-            defense: 2,
-            gold: 15,
-            dropItems: ['bread']
+            y: 5
           }
         ],
         items: [
           {
-            id: 'health_potion',
+            id: ITEM_HEALTH_POTION,
             x: 8,
             y: 3
           }
         ]
       },
-      forest_clearing: {
-        id: 'forest_clearing',
+      [ROOM_FOREST_CLEARING]: {
         name: 'Misty Clearing',
         width: 10,
         height: 10,
@@ -300,36 +268,19 @@ const areaData: Record<string, Area> = {
           {
             x: 5,
             y: 9,
-            target: 'forest_edge',
+            target: ROOM_FOREST_EDGE,
             targetX: 5,
             targetY: 0
           }
         ],
         npcs: [
-          {
-            id: 'forest_hermit',
-            name: 'Old Hermit',
-            x: 5,
-            y: 5,
-            dialogue: [
-              "Few travelers venture this deep into the mist...",
-              "I've been living here for decades, studying the mysteries of the forest.",
-              "Be careful of the ancient ruins to the east. Dark magic lingers there."
-            ]
-          }
+        
         ],
         enemies: [
           {
-            id: 'bear_1',
-            name: 'Forest Bear',
+            enemy: ENEMY_GIANT_SPIDER,
             x: 8,
-            y: 2,
-            health: 40,
-            maxHealth: 40,
-            damage: 10,
-            defense: 3,
-            gold: 30,
-            dropItems: ['health_potion', 'iron_helmet']
+            y: 2
           }
         ]
       }

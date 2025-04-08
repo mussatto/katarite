@@ -24,7 +24,7 @@ export const InteractionModal: React.FC<InteractionModalProps> = ({
     
     // Call the parent component's onAction callback if provided
     if (onAction) {
-      onAction(action.id);
+      onAction(action.label);
     }
     
     // If there's a next stage, go to it, otherwise close the modal
@@ -75,7 +75,7 @@ export const InteractionModal: React.FC<InteractionModalProps> = ({
               {/* Using img tag instead of Next.js Image for external URLs */}
               <img 
                 src={currentStage.image} 
-                alt={`${interaction.name} - ${currentStage.id}`}
+                alt={`${interaction.name} - ${currentStage.text}`}
                 className="h-full object-cover"
               />
             </div>
@@ -91,9 +91,9 @@ export const InteractionModal: React.FC<InteractionModalProps> = ({
         
         {/* Action buttons */}
         <div className="p-4 border-t border-gray-700 bg-gray-800 flex flex-wrap gap-2 justify-center">
-          {currentStage.actions.map((action) => (
+          {Object.entries(currentStage.actions).map(([id, action]: [string, ActionOption]) => (
             <Button
-              key={action.id}
+              key={id}
               variant={interaction.type === 'enemy' ? "destructive" : "default"}
               size="lg"
               onClick={() => handleAction(action)}

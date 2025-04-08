@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useGame } from '../state/gameContext';
 import MapTile from '../components/game/MapTile';
-import areaData, { Exit, NPC, Enemy, Item } from '../data/areaData';
+import areaData, { Exit, Item } from '../data/areaData';
 import itemDatabase from '../data/itemDatabase';
 import { InteractionModal } from '../components/ui/InteractionModal';
 import { mockInteractions } from '../data/mockInteractions';
+import { NPC } from '../data/npcData';
 
 const AreaMapView: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -51,14 +52,7 @@ const AreaMapView: React.FC = () => {
     // Check if there's an NPC at this position
     const npc = room.npcs?.find(npc => npc.x === x && npc.y === y);
     if (npc) {
-      handleNPCInteraction(npc);
-      return;
-    }
-    
-    // Check if there's an enemy at this position
-    const enemy = room.enemies?.find(enemy => enemy.x === x && enemy.y === y);
-    if (enemy) {
-      handleEnemyInteraction(enemy);
+      handleNPCInteraction(npc.npc as NPC);
       return;
     }
     
@@ -127,7 +121,7 @@ const AreaMapView: React.FC = () => {
       dispatch({
         type: 'OPEN_SHOP',
         payload: {
-          npcId: npc.id,
+          npc: npc,
           inventory: npc.shopInventory
         }
       });
@@ -135,79 +129,21 @@ const AreaMapView: React.FC = () => {
     }
     
     // Use the interaction system for NPCs
-    if (npc.id === 'elder_thomas') {
-      setActiveInteraction('elderThomas');
-      dispatch({
-        type: 'ADD_LOG_MESSAGE',
-        payload: {
-          text: `You approach ${npc.name} to talk.`,
-          type: 'dialogue'
-        }
-      });
-      return;
-    }
     
-    // Fallback for NPCs without detailed interactions
-    if (npc.dialogue.length > 0) {
-      const randomDialogueIndex = Math.floor(Math.random() * npc.dialogue.length);
-      dispatch({
-        type: 'ADD_LOG_MESSAGE',
-        payload: {
-          text: `${npc.name}: "${npc.dialogue[randomDialogueIndex]}"`,
-          type: 'dialogue'
-        }
-      });
-    }
-  };
-  
-  // Handle enemy interaction (simple combat)
-  const handleEnemyInteraction = (enemy: Enemy) => {
-    // Use the interaction system for enemies
-    if (enemy.id === 'giant_spider') {
-      setActiveInteraction('giantSpider');
-      dispatch({
-        type: 'ADD_LOG_MESSAGE',
-        payload: {
-          text: `You encounter a ${enemy.name}!`,
-          type: 'combat'
-        }
-      });
-      return;
-    }
+    // if (npc.id === 'elder_thomas') {
+    //   setActiveInteraction('elderThomas');
+    //   dispatch({
+    //     type: 'ADD_LOG_MESSAGE',
+    //     payload: {
+    //       text: `You approach ${npc.name} to talk.`,
+    //       type: 'dialogue'
+    //     }
+    //   });
+    //   return;
+    // }
+
+    setActiveInteraction(npc.interaction?.initialStage || null);
     
-    // Fallback for enemies without detailed interactions
-    let playerDamage = 10; // Base damage
-    
-    // Get equipped weapon damage (simplified)
-    const equippedWeaponId = state.player.equipped.hand;
-    if (equippedWeaponId) {
-      const weaponItem = itemDatabase[equippedWeaponId];
-      if (weaponItem && weaponItem.damage) {
-        playerDamage += weaponItem.damage;
-      }
-    }
-    
-    // Account for enemy defense
-    const actualDamage = Math.max(1, playerDamage - enemy.defense);
-    
-    dispatch({
-      type: 'ADD_LOG_MESSAGE',
-      payload: {
-        text: `You attack ${enemy.name} for ${actualDamage} damage!`,
-        type: 'combat'
-      }
-    });
-    
-    // Enemy counterattack
-    const enemyDamage = Math.max(1, enemy.damage - 2); // Assuming player has some defense
-    
-    dispatch({
-      type: 'ADD_LOG_MESSAGE',
-      payload: {
-        text: `${enemy.name} counterattacks for ${enemyDamage} damage!`,
-        type: 'combat'
-      }
-    });
   };
 
   // Handle closing the interaction modal

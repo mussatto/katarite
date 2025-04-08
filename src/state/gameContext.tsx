@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import defaultPlayer, { PlayerState } from '../data/playerData';
 import worldMapData from '../data/worldData';
 import areaData from '../data/areaData';
+import { NPC } from '../data/npcData';
 
 // Game view states
 export type GameView = 'START_SCREEN' | 'WORLD_MAP_VIEW' | 'AREA_MAP_VIEW' | 'INVENTORY_VIEW' | 'SHOP_VIEW' | 'GAME_OVER_SCREEN';
@@ -19,7 +20,7 @@ export interface GameState {
   player: PlayerState;
   messageLog: LogMessage[];
   activeShop: {
-    npcId: string;
+    npc: NPC;
     inventory: string[];
   } | null;
   logCounter: number; // Used to generate unique IDs for messages
@@ -31,7 +32,7 @@ type ActionType =
   | { type: 'UPDATE_PLAYER'; payload: Partial<PlayerState> }
   | { type: 'SET_LOCATION'; payload: { areaId: string; roomId: string; x: number; y: number } }
   | { type: 'ADD_LOG_MESSAGE'; payload: { text: string; type: 'system' | 'combat' | 'dialogue' } }
-  | { type: 'OPEN_SHOP'; payload: { npcId: string; inventory: string[] } }
+  | { type: 'OPEN_SHOP'; payload: { npc: NPC; inventory: string[] } }
   | { type: 'CLOSE_SHOP' }
   | { type: 'ADD_GOLD'; payload: number }
   | { type: 'SPEND_GOLD'; payload: number }
@@ -94,7 +95,7 @@ const gameReducer = (state: GameState, action: ActionType): GameState => {
       return {
         ...state,
         activeShop: {
-          npcId: action.payload.npcId,
+          npc: action.payload.npc,
           inventory: action.payload.inventory
         },
         view: 'SHOP_VIEW'
