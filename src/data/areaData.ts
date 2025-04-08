@@ -103,7 +103,7 @@ const areaData: Record<string, Area> = {
         ],
         npcs: [
           {
-            id: 'town_elder',
+            id: 'elder_thomas',
             name: 'Elder Thomas',
             x: 5,
             y: 5,
@@ -213,7 +213,7 @@ const areaData: Record<string, Area> = {
         ],
         enemies: [
           {
-            id: 'spider_1',
+            id: 'giant_spider',
             name: 'Giant Spider',
             x: 5,
             y: 5,

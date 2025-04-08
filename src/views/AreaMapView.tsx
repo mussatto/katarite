@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../state/gameContext';
 import MapTile from '../components/game/MapTile';
 import areaData, { Exit, NPC, Enemy, Item } from '../data/areaData';
 import itemDatabase from '../data/itemDatabase';
+import { InteractionModal } from '../components/ui/InteractionModal';
+import { mockInteractions } from '../data/mockInteractions';
 
 const AreaMapView: React.FC = () => {
   const { state, dispatch } = useGame();
+  const [activeInteraction, setActiveInteraction] = useState<string | null>(null);
   
   // Get current location data
   const currentAreaId = state.player.currentAreaId;
@@ -35,6 +38,9 @@ const AreaMapView: React.FC = () => {
   
   // Handle tile click
   const handleTileClick = (x: number, y: number) => {
+    // Ignore tile clicks when an interaction is active
+    if (activeInteraction) return;
+
     // Check if the tile is an exit
     const exit = room.exits.find(exit => exit.x === x && exit.y === y);
     if (exit) {
@@ -128,7 +134,20 @@ const AreaMapView: React.FC = () => {
       return;
     }
     
-    // Otherwise, display dialogue
+    // Use the interaction system for NPCs
+    if (npc.id === 'elder_thomas') {
+      setActiveInteraction('elderThomas');
+      dispatch({
+        type: 'ADD_LOG_MESSAGE',
+        payload: {
+          text: `You approach ${npc.name} to talk.`,
+          type: 'dialogue'
+        }
+      });
+      return;
+    }
+    
+    // Fallback for NPCs without detailed interactions
     if (npc.dialogue.length > 0) {
       const randomDialogueIndex = Math.floor(Math.random() * npc.dialogue.length);
       dispatch({
@@ -143,10 +162,20 @@ const AreaMapView: React.FC = () => {
   
   // Handle enemy interaction (simple combat)
   const handleEnemyInteraction = (enemy: Enemy) => {
-    // In a full implementation, this would involve a more complex combat system
-    // For now, just do simple damage calculation
+    // Use the interaction system for enemies
+    if (enemy.id === 'giant_spider') {
+      setActiveInteraction('giantSpider');
+      dispatch({
+        type: 'ADD_LOG_MESSAGE',
+        payload: {
+          text: `You encounter a ${enemy.name}!`,
+          type: 'combat'
+        }
+      });
+      return;
+    }
     
-    // Player attacks enemy
+    // Fallback for enemies without detailed interactions
     let playerDamage = 10; // Base damage
     
     // Get equipped weapon damage (simplified)
@@ -161,8 +190,6 @@ const AreaMapView: React.FC = () => {
     // Account for enemy defense
     const actualDamage = Math.max(1, playerDamage - enemy.defense);
     
-    // Update enemy health (this would normally be in the state)
-    // For demo purposes, we'll just show the message
     dispatch({
       type: 'ADD_LOG_MESSAGE',
       payload: {
@@ -181,8 +208,29 @@ const AreaMapView: React.FC = () => {
         type: 'combat'
       }
     });
-    
-    // In a full implementation, this would update health values and check for defeat
+  };
+
+  // Handle closing the interaction modal
+  const handleCloseInteraction = () => {
+    setActiveInteraction(null);
+    dispatch({
+      type: 'ADD_LOG_MESSAGE',
+      payload: {
+        text: 'You end the interaction.',
+        type: 'system'
+      }
+    });
+  };
+
+  // Handle actions from the interaction modal
+  const handleInteractionAction = (actionId: string) => {
+    dispatch({
+      type: 'ADD_LOG_MESSAGE',
+      payload: {
+        text: `Action taken: ${actionId}`,
+        type: activeInteraction === 'giantSpider' ? 'combat' : 'dialogue'
+      }
+    });
   };
   
   // Handle item pickup
@@ -303,22 +351,24 @@ const AreaMapView: React.FC = () => {
         {/* Right side: Info & actions (25%) */}
         <div className="w-1/4 flex flex-col">
           {/* Message log */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            <div className="bg-base-100 rounded-lg shadow-lg p-4 h-full">
+          <div className="flex-1 p-4 flex flex-col">
+            <div className="bg-base-100 rounded-lg shadow-lg p-4 flex-1 flex flex-col">
               <h3 className="font-bold mb-2">Message Log</h3>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
-                {state.messageLog.map((message) => (
-                  <div 
-                    key={message.id} 
-                    className={`text-sm ${
-                      message.type === 'combat' ? 'text-error' : 
-                      message.type === 'dialogue' ? 'text-info' : 
-                      'text-base-content'
-                    }`}
-                  >
-                    {message.text}
-                  </div>
-                ))}
+              <div className="flex-1 overflow-y-auto pr-1">
+                <div className="space-y-1">
+                  {state.messageLog.slice(-15).map((message) => (
+                    <div 
+                      key={message.id} 
+                      className={`text-sm mb-1 ${
+                        message.type === 'combat' ? 'text-error' : 
+                        message.type === 'dialogue' ? 'text-info' : 
+                        'text-base-content'
+                      }`}
+                    >
+                      {message.text}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -362,6 +412,15 @@ const AreaMapView: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Render the active interaction modal */}
+      {activeInteraction && (
+        <InteractionModal
+          interaction={mockInteractions[activeInteraction]}
+          onClose={handleCloseInteraction}
+          onAction={handleInteractionAction}
+        />
+      )}
     </div>
   );
 };

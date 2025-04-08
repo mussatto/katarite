@@ -80,7 +80,7 @@ const gameReducer = (state: GameState, action: ActionType): GameState => {
       return {
         ...state,
         messageLog: [
-          ...state.messageLog.slice(-9), // Keep last 9 messages
+          ...state.messageLog.slice(-14), // Keep last 14 messages
           { 
             id: state.logCounter + 1, 
             text: action.payload.text, 
@@ -282,7 +282,7 @@ const gameReducer = (state: GameState, action: ActionType): GameState => {
         return {
           ...state,
           messageLog: [
-            ...state.messageLog.slice(-9),
+            ...state.messageLog.slice(-14),
             { id: state.logCounter + 1, text: 'Game saved successfully', type: 'system' }
           ],
           logCounter: state.logCounter + 1
@@ -292,7 +292,7 @@ const gameReducer = (state: GameState, action: ActionType): GameState => {
         return {
           ...state,
           messageLog: [
-            ...state.messageLog.slice(-9),
+            ...state.messageLog.slice(-14),
             { id: state.logCounter + 1, text: 'Failed to save game', type: 'system' }
           ],
           logCounter: state.logCounter + 1
@@ -307,7 +307,7 @@ const gameReducer = (state: GameState, action: ActionType): GameState => {
           return {
             ...state,
             messageLog: [
-              ...state.messageLog.slice(-9),
+              ...state.messageLog.slice(-14),
               { id: state.logCounter + 1, text: 'No saved game found', type: 'system' }
             ],
             logCounter: state.logCounter + 1
@@ -320,7 +320,7 @@ const gameReducer = (state: GameState, action: ActionType): GameState => {
         return {
           ...state,
           messageLog: [
-            ...state.messageLog.slice(-9),
+            ...state.messageLog.slice(-14),
             { id: state.logCounter + 1, text: 'Failed to load game', type: 'system' }
           ],
           logCounter: state.logCounter + 1
