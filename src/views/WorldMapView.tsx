@@ -1,7 +1,6 @@
 import React from 'react';
 import { useGame } from '../state/gameContext';
 import worldMapData, { WorldMapLocation } from '../data/worldData';
-import areaData from '../data/areaData';
 
 const WorldMapView: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -19,23 +18,17 @@ const WorldMapView: React.FC = () => {
       return;
     }
     
-    const area = areaData[location.id];
-    if (!area) {
-      dispatch({
-        type: 'ADD_LOG_MESSAGE',
-        payload: {
-          text: `Error: Cannot find area data for ${location.name}.`,
-          type: 'system'
-        }
-      });
-      return;
-    }
-    
+    const area = location.area;
+    console.log("location");
+    console.log(location);
+    console.log("area");
+    console.log(area);
+    console.log(worldMapData)
     // Set player location
     dispatch({
       type: 'SET_LOCATION',
       payload: {
-        areaId: location.id,
+        area: area,
         roomId: area.entryPoint.roomId,
         x: area.entryPoint.x,
         y: area.entryPoint.y
@@ -75,7 +68,6 @@ const WorldMapView: React.FC = () => {
               {/* Map locations */}
               {Object.values(worldMapData).map((location) => (
                 <div
-                  key={location.id}
                   className={`absolute transform -translate-x-1/2 -translate-y-1/2 ${
                     location.unlocked 
                       ? 'cursor-pointer hover:scale-110 transition-transform' 
@@ -100,12 +92,12 @@ const WorldMapView: React.FC = () => {
               ))}
               
               {/* Player marker */}
-              {state.player.currentAreaId && (
+              {state.player.currentArea && (
                 <div 
                   className="absolute w-4 h-4 bg-primary rounded-full border-2 border-white animate-pulse"
                   style={{ 
-                    left: `${worldMapData[state.player.currentAreaId]?.position.x * 10}%`, 
-                    top: `${worldMapData[state.player.currentAreaId]?.position.y * 10}%` 
+                    left: `${state.player.currentArea?.entryPoint.x * 10}%`, 
+                    top: `${state.player.currentArea?.entryPoint.y * 10}%` 
                   }}
                 />
               )}

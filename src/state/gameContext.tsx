@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import defaultPlayer, { PlayerState } from '../data/playerData';
-import worldMapData from '../data/worldData';
-import areaData from '../data/areaData';
+import worldMapData, { WorldMapLocation } from '../data/worldData';
+import areaData, { Area } from '../data/areaData';
 import { NPC } from '../data/npcData';
 
 // Game view states
@@ -30,7 +30,7 @@ export interface GameState {
 type ActionType = 
   | { type: 'SET_VIEW'; payload: GameView }
   | { type: 'UPDATE_PLAYER'; payload: Partial<PlayerState> }
-  | { type: 'SET_LOCATION'; payload: { areaId: string; roomId: string; x: number; y: number } }
+  | { type: 'SET_LOCATION'; payload: { area: Area; roomId: string; x: number; y: number } }
   | { type: 'ADD_LOG_MESSAGE'; payload: { text: string; type: 'system' | 'combat' | 'dialogue' } }
   | { type: 'OPEN_SHOP'; payload: { npc: NPC; inventory: string[] } }
   | { type: 'CLOSE_SHOP' }
@@ -63,17 +63,14 @@ const gameReducer = (state: GameState, action: ActionType): GameState => {
       return { ...state, player: { ...state.player, ...action.payload } };
     
     case 'SET_LOCATION':
-      const { areaId, roomId, x, y } = action.payload;
+      const { area, roomId, x, y } = action.payload;
       return {
         ...state,
         player: {
           ...state.player,
-          currentAreaId: areaId,
-          currentRoomId: roomId,
-          position: { x, y },
-          visitedAreas: state.player.visitedAreas.includes(areaId) 
-            ? state.player.visitedAreas 
-            : [...state.player.visitedAreas, areaId]
+          currentArea: area,
+          currentRoom: area.rooms[roomId],
+          position: { x, y }
         }
       };
     

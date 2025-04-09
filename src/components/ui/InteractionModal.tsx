@@ -55,7 +55,7 @@ export const InteractionModal: React.FC<InteractionModalProps> = ({
         {/* Header with NPC/Enemy name and close button */}
         <div className="flex justify-between items-center p-4 border-b border-gray-700 bg-gray-800">
           <h2 className="text-xl font-bold text-white">
-            {interaction.type === 'npc' ? '👤 ' : '⚔️ '}{interaction.name}
+            {interaction.name}
           </h2>
           <button
             onClick={onClose}
@@ -94,7 +94,7 @@ export const InteractionModal: React.FC<InteractionModalProps> = ({
           {Object.entries(currentStage.actions).map(([id, action]: [string, ActionOption]) => (
             <Button
               key={id}
-              variant={interaction.type === 'enemy' ? "destructive" : "default"}
+              variant="default"
               size="lg"
               onClick={() => handleAction(action)}
             >

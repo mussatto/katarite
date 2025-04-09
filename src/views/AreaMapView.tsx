@@ -4,19 +4,16 @@ import MapTile from '../components/game/MapTile';
 import areaData, { Exit, Item } from '../data/areaData';
 import itemDatabase from '../data/itemDatabase';
 import { InteractionModal } from '../components/ui/InteractionModal';
-import { mockInteractions } from '../data/mockInteractions';
 import { NPC } from '../data/npcData';
+import { Interaction, interactions } from '../data/mockInteractions';
 
 const AreaMapView: React.FC = () => {
   const { state, dispatch } = useGame();
-  const [activeInteraction, setActiveInteraction] = useState<string | null>(null);
-  
-  // Get current location data
-  const currentAreaId = state.player.currentAreaId;
-  const currentRoomId = state.player.currentRoomId;
+  const [activeInteraction, setActiveInteraction] = useState<Interaction | null>(null);
+
   
   // Check if required data exists
-  if (!currentAreaId || !currentRoomId || !areaData[currentAreaId]?.rooms[currentRoomId]) {
+  if (!state.player.currentArea || !state.player.currentRoom ) {
     return (
       <div className="min-h-screen bg-base-300 flex items-center justify-center">
         <div className="bg-base-100 p-6 rounded-lg shadow-lg">
@@ -32,10 +29,7 @@ const AreaMapView: React.FC = () => {
       </div>
     );
   }
-  
-  // Area and room data
-  const area = areaData[currentAreaId];
-  const room = area.rooms[currentRoomId];
+
   
   // Handle tile click
   const handleTileClick = (x: number, y: number) => {
@@ -43,21 +37,23 @@ const AreaMapView: React.FC = () => {
     if (activeInteraction) return;
 
     // Check if the tile is an exit
-    const exit = room.exits.find(exit => exit.x === x && exit.y === y);
+    const exit = state.player.currentRoom!.exits.find(exit => exit.x === x && exit.y === y);
     if (exit) {
       handleExit(exit);
       return;
     }
     
     // Check if there's an NPC at this position
-    const npc = room.npcs?.find(npc => npc.x === x && npc.y === y);
-    if (npc) {
-      handleNPCInteraction(npc.npc as NPC);
+    const roomNpc = state.player.currentRoom!.npcs?.find(npc => npc.x === x && npc.y === y);
+    if (roomNpc) {
+      console.log('NPC found at position', x, y);
+      console.log('NPC', roomNpc.npc);
+      handleNPCInteraction(roomNpc.npc);
       return;
     }
     
     // Check if there's an item at this position
-    const item = room.items?.find(item => item.x === x && item.y === y);
+    const item = state.player.currentRoom!.items?.find(item => item.x === x && item.y === y);
     if (item) {
       handleItemPickup(item);
       return;
@@ -81,7 +77,7 @@ const AreaMapView: React.FC = () => {
       });
     } else {
       // Move to another room
-      const targetRoom = area.rooms[exit.target];
+      const targetRoom = state.player.currentArea!.rooms[exit.target];
       if (!targetRoom) {
         dispatch({ 
           type: 'ADD_LOG_MESSAGE', 
@@ -97,7 +93,7 @@ const AreaMapView: React.FC = () => {
       dispatch({
         type: 'SET_LOCATION',
         payload: {
-          areaId: currentAreaId,
+          area: state.player.currentArea!,
           roomId: exit.target,
           x: exit.targetX || 0,
           y: exit.targetY || 0
@@ -127,22 +123,8 @@ const AreaMapView: React.FC = () => {
       });
       return;
     }
-    
-    // Use the interaction system for NPCs
-    
-    // if (npc.id === 'elder_thomas') {
-    //   setActiveInteraction('elderThomas');
-    //   dispatch({
-    //     type: 'ADD_LOG_MESSAGE',
-    //     payload: {
-    //       text: `You approach ${npc.name} to talk.`,
-    //       type: 'dialogue'
-    //     }
-    //   });
-    //   return;
-    // }
 
-    setActiveInteraction(npc.interaction?.initialStage || null);
+    setActiveInteraction(npc.interaction || null);
     
   };
 
@@ -164,7 +146,7 @@ const AreaMapView: React.FC = () => {
       type: 'ADD_LOG_MESSAGE',
       payload: {
         text: `Action taken: ${actionId}`,
-        type: activeInteraction === 'giantSpider' ? 'combat' : 'dialogue'
+        type: 'dialogue'
       }
     });
   };
@@ -224,18 +206,18 @@ const AreaMapView: React.FC = () => {
   const renderRoomGrid = () => {
     const rows = [];
     
-    for (let y = 0; y < room.height; y++) {
+    for (let y = 0; y < state.player.currentRoom!.height; y++) {
       const row = [];
-      for (let x = 0; x < room.width; x++) {
+      for (let x = 0; x < state.player.currentRoom!.width; x++) {
         // Determine what's on this tile
         const hasPlayer = state.player.position.x === x && state.player.position.y === y;
-        const hasNPC = room.npcs?.some(npc => npc.x === x && npc.y === y) || false;
-        const hasEnemy = room.enemies?.some(enemy => enemy.x === x && enemy.y === y) || false;
-        const hasItem = room.items?.some(item => item.x === x && item.y === y) || false;
-        const isExit = room.exits.some(exit => exit.x === x && exit.y === y);
+        const hasNPC = state.player.currentRoom!.npcs?.some(npc => npc.x === x && npc.y === y) || false;
+        const hasEnemy = state.player.currentRoom!.enemies?.some(enemy => enemy.x === x && enemy.y === y) || false;
+        const hasItem = state.player.currentRoom!.items?.some(item => item.x === x && item.y === y) || false;
+        const isExit = state.player.currentRoom!.exits.some(exit => exit.x === x && exit.y === y);
         
         // Get tile type (simplified since we're using dummy data)
-        const tileType = (room.tiles[y] && room.tiles[y][x]) || 'floor';
+        const tileType = (state.player.currentRoom!.tiles[y] && state.player.currentRoom!.tiles[y][x]) || 'floor';
         
         row.push(
           <MapTile
@@ -266,7 +248,7 @@ const AreaMapView: React.FC = () => {
     <div className="min-h-screen bg-base-300 flex flex-col">
       <div className="bg-base-100 p-4 shadow-md">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">{area.name} • {room.name}</h1>
+          <h1 className="text-xl font-bold">{state.player.currentArea!.name} • {state.player.currentRoom!.name}</h1>
           <button 
             className="btn btn-sm"
             onClick={() => dispatch({ type: 'SET_VIEW', payload: 'WORLD_MAP_VIEW' })}
@@ -352,7 +334,7 @@ const AreaMapView: React.FC = () => {
       {/* Render the active interaction modal */}
       {activeInteraction && (
         <InteractionModal
-          interaction={mockInteractions[activeInteraction]}
+          interaction={activeInteraction}
           onClose={handleCloseInteraction}
           onAction={handleInteractionAction}
         />

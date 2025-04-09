@@ -1,3 +1,6 @@
+import { Area, Room } from "./areaData";
+import { WorldMapLocation } from "./worldData";
+
 // Types
 export interface InventoryItem {
   itemId: string;
@@ -27,14 +30,13 @@ export interface PlayerState {
     feet?: string;
   };
   // Location
-  currentAreaId: string | null;
-  currentRoomId: string | null;
+  currentArea: Area | null;
+  currentRoom: Room | null;
   position: {
     x: number;
     y: number;
   };
   // Game state
-  visitedAreas: string[];
   completedQuests: string[];
 }
 
@@ -76,10 +78,9 @@ export const createNewPlayer = (name: string): PlayerState => {
     equipped: {
       hand: 'sword_basic'
     },
-    currentAreaId: null,
-    currentRoomId: null,
+    currentArea: null,
+    currentRoom: null,
     position: { x: 0, y: 0 },
-    visitedAreas: [],
     completedQuests: []
   };
 };

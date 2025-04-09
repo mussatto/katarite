@@ -1,7 +1,4 @@
 // This file contains mock data for testing the interaction modal
-
-export type InteractionType = 'npc' | 'enemy';
-
 export interface ActionOption {
   label: string;
   nextStage?: string;
@@ -15,19 +12,16 @@ export interface Stage {
 }
 
 export interface Interaction {
-  type: InteractionType;
   name: string;
   stages: Record<string, Stage>;
   initialStage: string;
 }
 
-// Mock NPC Interaction - Elder Thomas
 export const elderThomasInteraction: Interaction = {
-  type: 'npc',
   name: 'Elder Thomas',
   initialStage: 'greeting',
   stages: {
-    greeting: {
+    'greeting': {
       image: '/assets/elder.webp',
       text: "Ah, young adventurer! Welcome to Oakwood Town. I am Elder Thomas, the leader of this humble community. How may I assist you today?",
       actions: {
@@ -159,11 +153,10 @@ export const elderThomasInteraction: Interaction = {
 };
 
 export const elfInteraction: Interaction = {
-  type: 'npc',
   name: 'Elf',
   initialStage: 'greeting',
   stages: {
-    greeting: {
+    'greeting': {
       image: '/assets/elf.webp',
       text: "Hello! I'm an elf from the forest. I can help you with your journey if you need.",
       actions: {
@@ -234,217 +227,10 @@ export const elfInteraction: Interaction = {
   }
 };
 
-// Mock Enemy Interaction - Giant Spider
-export const giantSpiderInteraction: Interaction = {
-  type: 'enemy',
-  name: 'Giant Spider',
-  initialStage: 'encounter',
-  stages: {
-    'encounter': {
-      image: '/assets/spider.png', // Updated to local asset
-      text: "As you traverse the dark chamber, a massive spider descends from the ceiling on a thick strand of web. Its multiple eyes gleam in the dim light, and venom drips from its fangs. The creature hisses and moves toward you with surprising speed!",
-      actions: {
-        'attack': {
-          label: 'Attack',
-          nextStage: 'combat'
-        },
-        'defend': {
-          label: 'Defend',
-          nextStage: 'defend'
-        },
-        'flee-attempt': {
-          label: 'Try to flee',
-          nextStage: 'flee-attempt'
-        }
-      }
-    },
-    'combat': {
-      image: '/assets/combat.png', // Updated to local asset
-      text: "You draw your weapon and strike at the spider! Your blow connects, wounding the creature. It shrieks in pain and anger, then lunges at you with its fangs extended!",
-      actions: {
-        'continue-attack': {
-          label: 'Continue attacking',
-          nextStage: 'victory'
-        },
-        'dodge': {
-          label: 'Try to dodge',
-          nextStage: 'dodge'
-        },
-        'use-potion': {
-          label: 'Use health potion',
-          nextStage: 'use-potion'
-        }
-      }
-    },
-    'defend': {
-      image: '/assets/defend.png', // Updated to local asset
-      text: "You raise your guard, preparing for the spider's attack. The creature charges forward, but your defensive stance reduces the impact. You manage to push it back momentarily, creating an opening!",
-      actions: {
-        'counter-attack': {
-          label: 'Counter-attack',
-          nextStage: 'victory'
-        },
-        'continue-defending': {
-          label: 'Maintain defense',
-          nextStage: 'stalemate'
-        },
-        'flee': {
-          label: 'Try to flee',
-          nextStage: 'flee-success'
-        }
-      }
-    },
-    'flee-attempt': {
-      image: '/assets/flee.png', // Updated to local asset
-      text: "You turn to escape, but the spider is too quick! It shoots a strand of sticky web that catches your leg, impeding your movement. The creature moves in closer, preparing to strike!",
-      actions: {
-        'cut-web': {
-          label: 'Cut the web and fight',
-          nextStage: 'combat'
-        },
-        'struggle': {
-          label: 'Struggle to break free',
-          nextStage: 'wounded-escape'
-        },
-        'throw-item': {
-          label: 'Throw something as distraction',
-          nextStage: 'flee-success'
-        }
-      }
-    },
-    'victory': {
-      image: '/assets/victory.png', // Updated to local asset
-      text: "With a final, decisive strike, you pierce the giant spider's body! The creature shudders and collapses, its legs curling inward. You've defeated the monster! Searching the area, you find the remains of previous victims and some valuable items among the spider's treasures.",
-      actions: {
-        'collect-loot': {
-          label: 'Collect loot (25 gold, Health Potion)',
-          // No next stage, will close the modal
-          // In a real implementation, this would add items to inventory
-        },
-        'examine-web': {
-          label: 'Examine the spider web',
-          nextStage: 'examine-web'
-        },
-        'leave': {
-          label: 'Leave the area',
-          // No next stage, will close the modal
-        }
-      }
-    },
-    'dodge': {
-      image: '/assets/dodge.png', // Updated to local asset
-      text: "You deftly sidestep as the spider lunges! Its fangs snap shut on empty air, and the creature slams into the wall behind you. This gives you a perfect opportunity to strike while it's disoriented.",
-      actions: {
-        'strike': {
-          label: 'Strike now!',
-          nextStage: 'victory'
-        },
-        'retreat': {
-          label: 'Retreat to safer position',
-          nextStage: 'stalemate'
-        },
-        'flee': {
-          label: 'Try to flee',
-          nextStage: 'flee-success'
-        }
-      }
-    },
-    'use-potion': {
-      image: '/assets/potion.png', // Updated to local asset
-      text: "You quickly retrieve a health potion and drink it. Warmth flows through your body as your wounds begin to close. Reinvigorated, you face the spider with renewed strength just as it prepares another attack!",
-      actions: {
-        'renewed-attack': {
-          label: 'Attack with renewed strength',
-          nextStage: 'victory'
-        },
-        'defensive-stance': {
-          label: 'Take defensive stance',
-          nextStage: 'stalemate'
-        },
-        'special-move': {
-          label: 'Use special ability',
-          nextStage: 'victory'
-        }
-      }
-    },
-    stalemate: {
-      image: '/assets/stalemate.png', // Updated to local asset
-      text: "You and the spider circle each other cautiously. The creature seems to be assessing you, looking for weaknesses. Its movements become more deliberate, and you realize this is no ordinary spider - it's hunting with intelligence!",
-      actions: {
-        'aggressive-attack': {
-          label: 'Launch aggressive attack',
-          nextStage: 'victory'
-        },
-        'careful-approach': {
-          label: 'Approach carefully',
-          nextStage: 'combat'
-        },
-        'environment': {
-          label: 'Use environment to advantage',
-          nextStage: 'victory'
-        }
-      }
-    },
-    'flee-success': {
-      image: '/assets/escape.png', // Updated to local asset
-      text: "Using quick thinking, you create a distraction that confuses the spider momentarily. Taking advantage of this opportunity, you sprint toward the exit. The creature gives chase but can't match your speed in the open passage. You've successfully escaped!",
-      actions: {
-        'continue': {
-          label: 'Continue exploring',
-          // No next stage, will close the modal
-        },
-        'rest': {
-          label: 'Find a safe place to rest',
-          // No next stage, will close the modal
-        },
-        'return': {
-          label: 'Return to town',
-          // No next stage, will close the modal
-        }
-      }
-    },
-    'wounded-escape': {
-      image: '/assets/wounded.png', // Updated to local asset
-      text: "You struggle frantically against the sticky web. Just as the spider closes in, you manage to tear free, though the effort leaves you with minor injuries. You scramble away, the spider in pursuit, but manage to squeeze through a narrow crevice the creature can't follow through. You're safe, but wounded.",
-      actions: {
-        'tend-wounds': {
-          label: 'Tend to your wounds',
-          // No next stage, will close the modal
-        },
-        'continue-carefully': {
-          label: 'Continue exploring carefully',
-          // No next stage, will close the modal
-        },
-        'return': {
-          label: 'Return to town',
-          // No next stage, will close the modal
-        }
-      }
-    },
-    'examine-web': {
-      image: '/assets/web.png', // Updated to local asset
-      text: "You carefully examine the giant spider web. Among the strands, you discover several cocoons containing previous victims. Most are too decomposed to identify, but you notice one still clutching a map. Carefully extracting it, you find it shows a hidden passage deeper in the caves, marked with a strange symbol.",
-      actions: {
-        'take-map': {
-          label: 'Take the map',
-          // No next stage, will close the modal
-          // In a real implementation, this would add the map to inventory
-        },
-        'examine-symbol': {
-          label: 'Try to identify the symbol',
-          // No next stage, will close the modal
-        },
-        'leave': {
-          label: 'Leave the area',
-          // No next stage, will close the modal
-        }
-      }
-    }
-  }
-};
+
 
 // Export an object with all interactions
-export const mockInteractions: Record<string, Interaction> = {
-  elderThomas: elderThomasInteraction,
-  giantSpider: giantSpiderInteraction
+export const interactions: Record<string, Interaction> = {
+    elderThomas: elderThomasInteraction,
+    elfInteraction: elfInteraction
 }; 

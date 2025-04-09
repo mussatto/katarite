@@ -141,7 +141,7 @@ const InventoryView: React.FC = () => {
               className="btn btn-sm"
               onClick={() => {
                 // Return to previous screen
-                const previousView = state.player.currentAreaId 
+                const previousView = state.player.currentArea 
                   ? 'AREA_MAP_VIEW' 
                   : 'WORLD_MAP_VIEW';
                 dispatch({ type: 'SET_VIEW', payload: previousView });
