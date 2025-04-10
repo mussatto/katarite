@@ -1,4 +1,4 @@
-# TileTurn Tactics (React RPG Framework)
+# Katarite
 
 A simple, foundational framework for creating a choice-based, turn-based RPG within a single-page application (SPA). Built with React and styled using DaisyUI and Tailwind CSS.
 
